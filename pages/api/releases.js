@@ -1,17 +1,50 @@
 // pages/api/releases.js
 import { getArtistReleases, getArtistInfo } from '../../lib/spotify'
 
-export default async function handler(req, res) {
-  try {
-    // Replace with your actual Spotify artist ID
-    const ARTIST_ID = process.env.SPOTIFY_ARTIST_ID
+// Map the query param value to its env var. Keys must match the `slug`
+// field in lib/data.js FAMILY entries.
+const ARTIST_ENV_MAP = {
+  default: process.env.SPOTIFY_ARTIST_ID,
+  uxban: process.env.SPOTIFY_UXBAN_ID,
+  jak: process.env.SPOTIFY_JAK_ID,
+}
 
+const CACHE_TTL_MS = 5 * 60 * 1000
+const cache = new Map()       // artistKey -> { data, expiresAt }
+const inflight = new Map()    // artistKey -> Promise (dedupe concurrent hits)
+
+export default async function handler(req, res) {
+  const artistKey = (req.query.artist || 'default').toString().toLowerCase()
+  const artistId = ARTIST_ENV_MAP[artistKey]
+
+  if (!artistId) {
+    return res.status(404).json({ error: `No Spotify ID configured for "${artistKey}"` })
+  }
+
+  const now = Date.now()
+  const cached = cache.get(artistKey)
+
+  if (cached && now < cached.expiresAt) {
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return res.status(200).json(cached.data)
+  }
+
+  // If another request for this artist is already in flight, wait for it
+  if (inflight.has(artistKey)) {
+    try {
+      const data = await inflight.get(artistKey)
+      return res.status(200).json(data)
+    } catch {
+      // fall through and try ourselves
+    }
+  }
+
+  const fetchPromise = (async () => {
     const [{ releases, topTracks }, artist] = await Promise.all([
-      getArtistReleases(ARTIST_ID),
-      getArtistInfo(ARTIST_ID),
+      getArtistReleases(artistId),
+      getArtistInfo(artistId),
     ])
 
-    // Sort releases: put most popular tracks' albums first
     const topAlbumIds = topTracks.map((t) => t.album?.id).filter(Boolean)
 
     const sorted = [...releases].sort((a, b) => {
@@ -23,9 +56,21 @@ export default async function handler(req, res) {
       return aIdx - bIdx
     })
 
-    res.status(200).json({ releases: sorted, artist })
+    return { releases: sorted, artist }
+  })()
+
+  inflight.set(artistKey, fetchPromise)
+
+  try {
+    const payload = await fetchPromise
+    inflight.delete(artistKey)
+    cache.set(artistKey, { data: payload, expiresAt: now + CACHE_TTL_MS })
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return res.status(200).json(payload)
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Failed to fetch releases' })
+    inflight.delete(artistKey)
+    console.error(`releases API error (${artistKey}):`, err.message)
+    if (cached) return res.status(200).json(cached.data)
+    return res.status(500).json({ error: 'Failed to fetch releases' })
   }
 }
