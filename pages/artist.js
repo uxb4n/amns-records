@@ -66,9 +66,13 @@ function Nav({ mobile }) {
       <span style={{ fontFamily: "Bebas Neue", fontSize: mobile ? "18px" : "24px", letterSpacing: mobile ? "2px" : "4px", color: "var(--white)" }}>
         AKANICO
       </span>
-      <a href={PRESAVE_RELEASE.href} className="hover-lift" style={{ display: "flex", alignItems: "center", gap: "8px", padding: mobile ? "8px 16px" : "10px 22px", border: "1px solid var(--border-light)", background: "rgba(255,255,255,0.08)", fontFamily: "Bebas Neue", fontSize: mobile ? "13px" : "15px", letterSpacing: "2px", color: "var(--white)", textDecoration: "none" }}>
-        LISTEN NOW
-      </a>
+      
+      {/* Nav button conditionally renders based on the teaser toggle */}
+      {!PRESAVE_RELEASE.isTeaser && (
+        <a href={PRESAVE_RELEASE.href} className="hover-lift" style={{ display: "flex", alignItems: "center", gap: "8px", padding: mobile ? "8px 16px" : "10px 22px", border: "1px solid var(--border-light)", background: "rgba(255,255,255,0.08)", fontFamily: "Bebas Neue", fontSize: mobile ? "13px" : "15px", letterSpacing: "2px", color: "var(--white)", textDecoration: "none" }}>
+          LISTEN NOW
+        </a>
+      )}
     </nav>
   )
 }
@@ -127,31 +131,48 @@ function SocialPanel({ artist, mobile }) {
 
 // ─── Hero ───
 function PresaveHero({ mobile }) {
-  const { image, videoSrc, href } = PRESAVE_RELEASE
+  const { image, bgImage, videoSrc, href, isTeaser, name, subtitle } = PRESAVE_RELEASE
 
   return (
     <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", border: "1px solid var(--border)", background: "#0a0a0a", padding: mobile ? "40px 24px" : "60px 40px", minHeight: mobile ? "auto" : "400px", height: "100%", overflow: "hidden" }}>
+      
+      {/* Background Image / Video */}
       {videoSrc ? (
         <video src={videoSrc} autoPlay muted loop playsInline className="hero-bg-pan" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(60%) brightness(0.4)", zIndex: 0 }} />
       ) : (
-        <Image src={image} alt="" fill priority sizes="(max-width: 900px) 100vw, 40vw" className="hero-bg-pan" style={{ objectFit: "cover", filter: "grayscale(60%) brightness(0.4)", zIndex: 0 }} />
+        <Image src={bgImage || image} alt="" fill priority sizes="(max-width: 900px) 100vw, 40vw" className="hero-bg-pan" style={{ objectFit: "cover", filter: "grayscale(60%) brightness(0.4)", zIndex: 0 }} />
       )}
 
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.85) 100%)", zIndex: 1 }} />
 
       <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: "600px", margin: "0 auto" }}>
 
-        <div style={{ position: "relative", width: mobile ? "120px" : "160px", height: mobile ? "120px" : "160px", marginTop: 0, marginBottom: "20px", border: "1px solid var(--border-light)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-          <Image src={image} alt={PRESAVE_RELEASE.name} fill priority sizes="(max-width: 900px) 120px, 160px" style={{ objectFit: "cover" }} />
+        {/* Center Image (Blurred if Teaser) */}
+        <div style={{ position: "relative", width: mobile ? "120px" : "160px", height: mobile ? "120px" : "160px", marginTop: 0, marginBottom: "20px", border: "1px solid var(--border-light)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", overflow: "hidden" }}>
+          <Image 
+            src={image} 
+            alt={name} 
+            fill 
+            priority 
+            sizes="(max-width: 900px) 120px, 160px" 
+            style={{ objectFit: "cover", filter: isTeaser ? "blur(8px) scale(1.1)" : "none" }} 
+          />
         </div>
 
-        <h1 style={{ fontFamily: "Bebas Neue", fontSize: mobile ? "clamp(40px, 10vw, 64px)" : "clamp(56px, 6vw, 96px)", lineHeight: 0.95, letterSpacing: "2px", color: "#fff", margin: 0, marginBottom: "20px" }}>
-          {PRESAVE_RELEASE.name}
+        <h1 style={{ fontFamily: "Bebas Neue", fontSize: mobile ? "clamp(40px, 10vw, 64px)" : "clamp(56px, 6vw, 96px)", lineHeight: 0.95, letterSpacing: "2px", color: "#fff", margin: 0, marginBottom: isTeaser ? "10px" : "20px" }}>
+          {name}
         </h1>
 
-        <a href={href} className="hover-lift" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: mobile ? "10px 24px" : "12px 32px", border: "1px solid var(--border-light)", background: "rgba(255,255,255,0.08)", fontFamily: "Bebas Neue", fontSize: mobile ? "16px" : "18px", letterSpacing: "3px", color: "var(--white)", textDecoration: "none", marginBottom: 0, transition: "all 0.2s ease" }}>
-          LISTEN NOW
-        </a>
+        {/* Conditional rendering: Button vs Teaser Text */}
+        {isTeaser ? (
+          <p style={{ fontFamily: "Bebas Neue", fontSize: "16px", letterSpacing: "4px", color: "var(--text-dim)", margin: 0 }}>
+            {subtitle}
+          </p>
+        ) : (
+          <a href={href} className="hover-lift" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: mobile ? "10px 24px" : "12px 32px", border: "1px solid var(--border-light)", background: "rgba(255,255,255,0.08)", fontFamily: "Bebas Neue", fontSize: mobile ? "16px" : "18px", letterSpacing: "3px", color: "var(--white)", textDecoration: "none", marginBottom: 0, transition: "all 0.2s ease" }}>
+            LISTEN NOW
+          </a>
+        )}
       </div>
     </div>
   )
@@ -429,7 +450,7 @@ export default function Home({ releaseSlug = null }) {
 
               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 2.5, minHeight: 0, height: '100%', position: 'relative', animationDelay: '0.10s' }}>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Bebas Neue', fontSize: '13vw', color: 'rgba(255,255,255,0.02)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, userSelect: 'none' }}>
-                  NOT ON MY LEVEL
+                  {PRESAVE_RELEASE.isTeaser ? "COMING SOON" : "NOT ON MY LEVEL"}
                 </div>
 
                 <PresaveHero mobile={mobile} />
