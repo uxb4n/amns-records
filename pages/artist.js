@@ -35,7 +35,7 @@ function useIsMobile() {
   return mobile
 }
 
-// ── PlayIcon (only ReleasePanel uses this, so it stays local) ──
+// ── PlayIcon ──
 const PlayIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M8 5v14l11-7z" />
@@ -67,7 +67,6 @@ function Nav({ mobile }) {
         AKANICO
       </span>
       
-      {/* Nav button conditionally renders based on the teaser toggle */}
       {!PRESAVE_RELEASE.isTeaser && (
         <a href={PRESAVE_RELEASE.href} className="hover-lift" style={{ display: "flex", alignItems: "center", gap: "8px", padding: mobile ? "8px 16px" : "10px 22px", border: "1px solid var(--border-light)", background: "rgba(255,255,255,0.08)", fontFamily: "Bebas Neue", fontSize: mobile ? "13px" : "15px", letterSpacing: "2px", color: "var(--white)", textDecoration: "none" }}>
           LISTEN NOW
@@ -136,7 +135,6 @@ function PresaveHero({ mobile }) {
   return (
     <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", border: "1px solid var(--border)", background: "#0a0a0a", padding: mobile ? "40px 24px" : "60px 40px", minHeight: mobile ? "auto" : "400px", height: "100%", overflow: "hidden" }}>
       
-      {/* Background Image / Video */}
       {videoSrc ? (
         <video src={videoSrc} autoPlay muted loop playsInline className="hero-bg-pan" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(60%) brightness(0.4)", zIndex: 0 }} />
       ) : (
@@ -147,7 +145,6 @@ function PresaveHero({ mobile }) {
 
       <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: "600px", margin: "0 auto" }}>
 
-        {/* Center Image (Blurred if Teaser) */}
         <div style={{ position: "relative", width: mobile ? "120px" : "160px", height: mobile ? "120px" : "160px", marginTop: 0, marginBottom: "20px", border: "1px solid var(--border-light)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", overflow: "hidden" }}>
           <Image 
             src={image} 
@@ -163,7 +160,6 @@ function PresaveHero({ mobile }) {
           {name}
         </h1>
 
-        {/* Conditional rendering: Button vs Teaser Text */}
         {isTeaser ? (
           <p style={{ fontFamily: "Bebas Neue", fontSize: "16px", letterSpacing: "4px", color: "var(--text-dim)", margin: 0 }}>
             {subtitle}
@@ -183,7 +179,7 @@ function Footer() {
   return (
     <footer style={{ flexShrink: 0, height: "28px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", background: "#0a0a0a" }}>
       <span style={{ fontSize: "9px", letterSpacing: "1px", color: "var(--text-dim)", textAlign: "center", padding: "0 16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
-        ℗© 2026 AKANICO / AMNS Records. All rights reserved.
+        ℗© 2026 AKANICO. All rights reserved.
       </span>
     </footer>
   )
@@ -349,12 +345,12 @@ export default function Home({ releaseSlug = null }) {
     return (
       <>
         <Head>
-          <title>{`${activeRelease.name} — New Release | AMNS Records`}</title>
-          <meta name="description" content={`${activeRelease.name} is a new and separate release from AMNS Records. Listen now on Spotify, Apple Music, and YouTube Music.`} />
+          <title>{`${activeRelease.name} — AKANICO`}</title>
+          <meta name="description" content={`Listen to ${activeRelease.name} by AKANICO.`} />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
-          <meta property="og:title" content={`${activeRelease.name} — New Release | AMNS Records`} />
-          <meta property="og:description" content={`Listen to ${activeRelease.name}, a new release from AMNS Records.`} />
+          <meta property="og:title" content={`${activeRelease.name} — AKANICO`} />
+          <meta property="og:description" content={`Listen to ${activeRelease.name} by AKANICO.`} />
           <meta property="og:image" content={activeRelease.image} />
         </Head>
         <style jsx global>{`
@@ -389,8 +385,8 @@ export default function Home({ releaseSlug = null }) {
   return (
     <>
       <Head>
-        <title>AMNS Records</title>
-        <meta name="description" content="AMNS Records — Independent music label." />
+        <title>AKANICO</title>
+        <meta name="description" content="AKANICO — Official Website." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -449,8 +445,10 @@ export default function Home({ releaseSlug = null }) {
               </div>
 
               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 2.5, minHeight: 0, height: '100%', position: 'relative', animationDelay: '0.10s' }}>
+                
+                {/* Dynamic background watermark */}
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Bebas Neue', fontSize: '13vw', color: 'rgba(255,255,255,0.02)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, userSelect: 'none' }}>
-                  {PRESAVE_RELEASE.isTeaser ? "COMING SOON" : "NOT ON MY LEVEL"}
+                  {PRESAVE_RELEASE.name.toUpperCase()}
                 </div>
 
                 <PresaveHero mobile={mobile} />
