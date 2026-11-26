@@ -445,11 +445,6 @@ export default function Home({ releaseSlug = null }) {
               </div>
 
               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 2.5, minHeight: 0, height: '100%', position: 'relative', animationDelay: '0.10s' }}>
-                
-                {/* Dynamic background watermark */}
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Bebas Neue', fontSize: '13vw', color: 'rgba(255,255,255,0.02)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, userSelect: 'none' }}>
-                  {PRESAVE_RELEASE.name.toUpperCase()}
-                </div>
 
                 <PresaveHero mobile={mobile} />
 
